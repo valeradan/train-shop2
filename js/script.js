@@ -43,11 +43,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const deadline = "2023-11-01";
 
     function getTimeRemain(endtime) {
-        const t = Date.parse(endtime) - Date.parse(new Date()), // разница в миллисекундах
+        let days, hours, minutes, seconds;
+        const t = Date.parse(endtime) - Date.parse(new Date());
+
+        if (t <= 0) {
+            days = 0;
+            hours = 0;
+            minutes = 0;
+            seconds = 0;
+        } else {
             days = Math.floor(t / (1000 * 60 * 60 * 24)),
-            hours = Math.floor((t / (1000 * 60 * 60)) % 24),
-            minutes = Math.floor((t / 1000 / 60) % 60),
-            seconds = Math.floor((t / 1000) % 60);
+                hours = Math.floor((t / (1000 * 60 * 60)) % 24),
+                minutes = Math.floor((t / 1000 / 60) % 60),
+                seconds = Math.floor((t / 1000) % 60);
+        }
+
+        // разница в миллисекундах
         return {
             "total": t,
             "days": days,
@@ -91,10 +102,55 @@ document.addEventListener("DOMContentLoaded", () => {
     setClock(".timer", deadline)
 
 
+    /////// Modal
+
+    let modalBtns = document.querySelectorAll("[data-modal]"),
+        modalWindow = document.querySelector(".modal"),
+        modalClose = document.querySelector(".modal__close")
+
+    modalBtns.forEach((btn) => {
+        btn.addEventListener("click", openModal);
+    });
+
+    function openModal() {
+        modalWindow.style.display = "block";
+        document.body.style.overflow = "hidden";
+        clearInterval(modalTimerId)
+    }
 
 
+    function closeModal() {
+        modalWindow.style.display = "none";
+        document.body.style.overflow = "";
+        setModalTimer();
+    };
 
 
+    modalClose.addEventListener("click", closeModal);
+
+    modalWindow.addEventListener("click", (e) => {
+        if (e.target === modalWindow) {
+            closeModal()
+        };
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === "Escape" && modalWindow.style.display == "block") {
+            closeModal()
+        }
+    });
+
+
+    const modalTimerId = setTimeout(openModal, 5000);
+
+
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
+            openModal();
+            window.removeEventListener("scroll", showModalByScroll);
+        }
+    }
+    window.addEventListener("scroll", showModalByScroll)
 
 
 
